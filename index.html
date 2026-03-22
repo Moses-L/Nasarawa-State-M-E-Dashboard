@@ -1,0 +1,2771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M&E Analytics Dashboard | AHF-Nasarawa State</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand-maroon: #8B1538;
+  --brand-dark-maroon: #6B0F2A;
+  --brand-light-maroon: #A52C4E;
+  --brand-white: #FFFFFF;
+  --brand-cream: #F5F5F0;
+  --success: #0F7C3C;
+  --warning: #D68910;
+  --danger: #C81E3A;
+  --info: #2F5D82;
+  --purple: #7B3F9E;
+  --dark: #1F2937;
+  --gray: #6B7280;
+  --light-gray: #F3F4F6;
+  --border: #E5E7EB;
+  --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, var(--brand-maroon) 0%, var(--brand-dark-maroon) 50%, #4A0E1D 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: var(--dark);
+}
+
+.dashboard-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  background: var(--brand-white);
+  border-radius: 16px;
+  padding: 20px 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-lg);
+  border-top: 4px solid var(--brand-maroon);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-container {
+  width: 200px;
+  height: 80px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 2px solid var(--brand-maroon);
+}
+
+.logo-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.title-text h1 {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--brand-maroon), var(--brand-dark-maroon));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.title-text p {
+  font-size: 14px;
+  color: var(--gray);
+  margin-top: 4px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--brand-maroon);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--brand-dark-maroon);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--light-gray);
+  color: var(--dark);
+  border: 1.5px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--brand-cream);
+  border-color: var(--brand-maroon);
+}
+
+/* Filter Bar */
+.filter-bar {
+  background: var(--brand-white);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  border-top: 3px solid var(--brand-maroon);
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filter-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-maroon);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-status {
+  font-size: 11px;
+  color: var(--gray);
+  padding: 3px 10px;
+  background: var(--light-gray);
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--brand-maroon);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dark);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: var(--brand-maroon);
+  box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* KPI Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.kpi-card {
+  background: var(--brand-white);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-start), var(--color-end));
+}
+
+.kpi-card.success {
+  --color-start: #0F7C3C;
+  --color-end: #0A5A2A;
+}
+
+.kpi-card.primary {
+  --color-start: var(--brand-maroon);
+  --color-end: var(--brand-dark-maroon);
+}
+
+.kpi-card.warning {
+  --color-start: #D68910;
+  --color-end: #A56908;
+}
+
+.kpi-card.danger {
+  --color-start: #C81E3A;
+  --color-end: #9A1529;
+}
+
+.kpi-card.info {
+  --color-start: #2F5D82;
+  --color-end: #1E3D55);
+}
+
+.kpi-card.purple {
+  --color-start: #7B3F9E;
+  --color-end: #5A2D75;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.kpi-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.kpi-card.success .kpi-value { color: var(--success); }
+.kpi-card.primary .kpi-value { color: var(--brand-maroon); }
+.kpi-card.warning .kpi-value { color: var(--warning); }
+.kpi-card.danger .kpi-value { color: var(--danger); }
+.kpi-card.info .kpi-value { color: var(--info); }
+.kpi-card.purple .kpi-value { color: var(--purple); }
+
+.kpi-subtitle {
+  font-size: 11px;
+  color: var(--gray);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.kpi-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.badge-success {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.badge-warning {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.badge-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Charts */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.chart-card {
+  background: var(--brand-white);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.chart-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--light-gray);
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brand-maroon);
+}
+
+.chart-icon {
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--brand-maroon), var(--brand-dark-maroon));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: white;
+}
+
+.chart-body {
+  position: relative;
+  height: 280px;
+}
+
+.chart-body.small {
+  height: 220px;
+}
+
+/* Tables */
+.table-container {
+  background: var(--brand-white);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  background: linear-gradient(135deg, var(--brand-maroon), var(--brand-dark-maroon));
+}
+
+.data-table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.data-table td {
+  padding: 12px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  color: var(--dark);
+}
+
+.data-table tbody tr:hover {
+  background: var(--brand-cream);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-high {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.status-medium {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.status-low {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  background: var(--brand-white);
+  padding: 6px;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--brand-maroon), var(--brand-dark-maroon));
+  color: white;
+}
+
+.tab-btn:hover:not(.active) {
+  background: var(--brand-cream);
+  color: var(--brand-maroon);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(139, 21, 56, 0.95);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.loading-overlay.show {
+  display: flex;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  .filter-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 8px;
+  }
+  
+  .header {
+    padding: 14px;
+  }
+  
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .logo-container {
+    width: 140px;
+    height: 56px;
+  }
+  
+  .title-text h1 {
+    font-size: 18px;
+  }
+  
+  .title-text p {
+    font-size: 12px;
+  }
+  
+  .filter-bar {
+    padding: 12px 16px;
+  }
+  
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .kpi-card {
+    padding: 12px;
+  }
+  
+  .kpi-value {
+    font-size: 22px;
+  }
+  
+  .tabs {
+    flex-direction: column;
+    padding: 4px;
+  }
+  
+  .tab-btn {
+    width: 100%;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  
+  .chart-card {
+    padding: 14px;
+  }
+  
+  .chart-body {
+    height: 240px;
+  }
+  
+  .chart-body.small {
+    height: 200px;
+  }
+  
+  .table-container {
+    padding: 14px;
+  }
+  
+  .ctrr-achievement-cards {
+    gap: 8px;
+  }
+  
+  .ctrr-card {
+    padding: 10px;
+  }
+  
+  .ctrr-card-value {
+    font-size: 20px;
+  }
+}
+
+/* CTRR Achievement Cards */
+.ctrr-achievement-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ctrr-card {
+  background: linear-gradient(135deg, var(--brand-white), var(--brand-cream));
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  border: 2px solid var(--border);
+}
+
+.ctrr-card-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.ctrr-card-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--brand-maroon);
+}
+
+.ctrr-card-subtitle {
+  font-size: 10px;
+  color: var(--gray);
+  margin-top: 3px;
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Processing data...</div>
+</div>
+
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">
+        <div class="logo-container">
+          <img src="data:image/png;base64,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" alt="AHF & Nasarawa State Logo">
+        </div>
+        <div class="title-text">
+          <h1>Nasarawa State Monitoring & Evaluation Dashboard</h1>
+          <p>AIDS Healthcare Foundation | Nasarawa State Benchmark KPI</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+          📂 Import Data
+        </button>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileUpload(event)" style="display: none;">
+        <span class="file-info" id="fileInfo"></span>
+        <button class="btn btn-secondary" onclick="window.print()">
+          🖨️ Print
+        </button>
+        <button class="btn btn-primary" onclick="refreshDashboard()">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-header">
+      <div class="filter-title">🔍 Data Filters</div>
+      <div class="filter-status" id="filterStatus">No filters applied</div>
+    </div>
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label>Reporting Hub</label>
+        <select id="hubFilter" onchange="applyFilters()">
+          <option value="all">All Hubs</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Facility</label>
+        <select id="facilityFilter" onchange="applyFilters()">
+          <option value="all">All Facilities</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Reporting Month</label>
+        <select id="dateFilter" onchange="applyFilters()">
+          <option value="all">All Months</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Gender</label>
+        <select id="genderFilter" onchange="applyFilters()">
+          <option value="all">All Genders</option>
+          <option value="M">Male</option>
+          <option value="F">Female</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Age Group</label>
+        <select id="ageFilter" onchange="applyFilters()">
+          <option value="all">All Ages</option>
+          <option value="0-14">0-14 years</option>
+          <option value="15-24">15-24 years</option>
+          <option value="25-34">25-34 years</option>
+          <option value="35-44">35-44 years</option>
+          <option value="45-54">45-54 years</option>
+          <option value="55+">55+ years</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>CD4 Category</label>
+        <select id="cd4Filter" onchange="applyFilters()">
+          <option value="all">All Categories</option>
+          <option value="<200">CD4 < 200</option>
+          <option value=">=200">CD4 ≥ 200</option>
+        </select>
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-secondary" onclick="resetFilters()">✖ Clear All Filters</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">📊 Overview</button>
+    <button class="tab-btn" onclick="switchTab(1)">👥 Patient Benchmarks</button>
+    <button class="tab-btn" onclick="switchTab(2)">🏥 Facility Performance</button>
+    <button class="tab-btn" onclick="switchTab(3)">🎯 Testing Hubs</button>
+    <button class="tab-btn" onclick="switchTab(4)">📈 Track Positive</button>
+  </div>
+
+  <!-- Tab Content: Overview -->
+  <div class="tab-content active" id="tab-0">
+    <div class="kpi-grid">
+      <div class="kpi-card success">
+        <div class="kpi-label">ART Initiation Rate</div>
+        <div class="kpi-value" id="kpi-art-rate">100%</div>
+        <div class="kpi-subtitle" id="kpi-art-subtitle">88 patients initiated</div>
+        <span class="kpi-badge badge-success">Excellent</span>
+      </div>
+      
+      <div class="kpi-card success">
+        <div class="kpi-label">TPT Coverage</div>
+        <div class="kpi-value" id="kpi-tpt">100%</div>
+        <div class="kpi-subtitle" id="kpi-tpt-subtitle">All eligible initiated</div>
+        <span class="kpi-badge badge-success">Target Met</span>
+      </div>
+      
+      <div class="kpi-card primary">
+        <div class="kpi-label">Overall Positivity</div>
+        <div class="kpi-value" id="kpi-positivity">1.7%</div>
+        <div class="kpi-subtitle" id="kpi-positivity-subtitle">89 positive / 5,248 tested</div>
+      </div>
+      
+      <div class="kpi-card success">
+        <div class="kpi-label">Linkage to ART</div>
+        <div class="kpi-value" id="kpi-linkage">98.9%</div>
+        <div class="kpi-subtitle" id="kpi-linkage-subtitle">88 of 89 linked</div>
+        <span class="kpi-badge badge-success">Excellent</span>
+      </div>
+      
+      <div class="kpi-card warning">
+        <div class="kpi-label">CTRR Achievement</div>
+        <div class="kpi-value" id="kpi-ctrr">81.0%</div>
+        <div class="kpi-subtitle" id="kpi-ctrr-subtitle">vs. projected targets</div>
+        <span class="kpi-badge badge-warning">Good</span>
+      </div>
+      
+      <div class="kpi-card info">
+        <div class="kpi-label">Total Tested</div>
+        <div class="kpi-value" id="kpi-tested">5,248</div>
+        <div class="kpi-subtitle" id="kpi-tested-subtitle">Across all facilities</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Testing Cascade</div>
+          <div class="chart-icon">📊</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="cascadeChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Hub Performance</div>
+          <div class="chart-icon">🎯</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="hubPerformanceChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Gender Distribution</div>
+          <div class="chart-icon">👥</div>
+        </div>
+        <div class="chart-body small">
+          <canvas id="genderChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Age Distribution</div>
+          <div class="chart-icon">📅</div>
+        </div>
+        <div class="chart-body small">
+          <canvas id="ageChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Patient Benchmarks -->
+  <div class="tab-content" id="tab-1">
+    <div class="kpi-grid">
+      <div class="kpi-card primary">
+        <div class="kpi-label">Total Patients</div>
+        <div class="kpi-value" id="pb-total">88</div>
+        <div class="kpi-subtitle">Enrolled in program</div>
+      </div>
+      
+      <div class="kpi-card success">
+        <div class="kpi-label">CD4 < 200</div>
+        <div class="kpi-value" id="pb-cd4-low">0</div>
+        <div class="kpi-subtitle">Advanced disease</div>
+      </div>
+      
+      <div class="kpi-card info">
+        <div class="kpi-label">CD4 ≥ 200</div>
+        <div class="kpi-value" id="pb-cd4-high">88</div>
+        <div class="kpi-subtitle">Good immune status</div>
+      </div>
+      
+      <div class="kpi-card warning">
+        <div class="kpi-label">Syphilis Positive</div>
+        <div class="kpi-value" id="pb-syphilis">0</div>
+        <div class="kpi-subtitle">0 of 88 tested</div>
+      </div>
+      
+      <div class="kpi-card purple">
+        <div class="kpi-label">Cervical Screened</div>
+        <div class="kpi-value" id="pb-cervical">0</div>
+        <div class="kpi-subtitle">0 of 0 eligible</div>
+      </div>
+      
+      <div class="kpi-card success">
+        <div class="kpi-label">TPT Initiated</div>
+        <div class="kpi-value" id="pb-tpt">88</div>
+        <div class="kpi-subtitle">100% coverage</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">CD4 Distribution</div>
+          <div class="chart-icon">💊</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="cd4Chart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">TPT & Syphilis Screening</div>
+          <div class="chart-icon">🩺</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="screeningChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <div class="chart-title">Hub-wise Patient Distribution</div>
+          <div class="chart-icon">🏥</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="hubPatientChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Facility Performance -->
+  <div class="tab-content" id="tab-2">
+    <div class="kpi-grid">
+      <div class="kpi-card info">
+        <div class="kpi-label">Total Facilities</div>
+        <div class="kpi-value" id="fp-total">0</div>
+        <div class="kpi-subtitle">Reporting facilities</div>
+      </div>
+      
+      <div class="kpi-card primary">
+        <div class="kpi-label">Avg Positivity</div>
+        <div class="kpi-value" id="fp-positivity">1.7%</div>
+        <div class="kpi-subtitle">Across all facilities</div>
+      </div>
+      
+      <div class="kpi-card success">
+        <div class="kpi-label">High Performers</div>
+        <div class="kpi-value" id="fp-high">0</div>
+        <div class="kpi-subtitle">> 2% positivity</div>
+      </div>
+      
+      <div class="kpi-card warning">
+        <div class="kpi-label">Index Testing</div>
+        <div class="kpi-value" id="fp-index">0</div>
+        <div class="kpi-subtitle">Contacts tested</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <div class="chart-title">Facility Testing Performance</div>
+          <div class="chart-icon">📊</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="facilityBarChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Top 10 Facilities by Volume</div>
+          <div class="chart-icon">🏆</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="topFacilitiesChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Positivity Rate Distribution</div>
+          <div class="chart-icon">📈</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="positivityDistChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="chart-header">
+        <div class="chart-title">Detailed Facility Performance Table</div>
+      </div>
+      <table class="data-table" id="facilityTable">
+        <thead>
+          <tr>
+            <th>Facility Name</th>
+            <th>Total Tested</th>
+            <th>Positive</th>
+            <th>Positivity Rate</th>
+            <th>Index Testing</th>
+            <th>Performance</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab Content: Testing Hubs -->
+  <div class="tab-content" id="tab-3">
+    <div class="kpi-grid">
+      <div class="kpi-card warning">
+        <div class="kpi-label">Avg CTRR Achievement</div>
+        <div class="kpi-value" id="th-ctrr">81.0%</div>
+        <div class="kpi-subtitle">vs. projected</div>
+        <span class="kpi-badge badge-warning">Good</span>
+      </div>
+      
+      <div class="kpi-card danger">
+        <div class="kpi-label">Positivity Achievement</div>
+        <div class="kpi-value" id="th-pos-ach">0%</div>
+        <div class="kpi-subtitle">vs. target</div>
+        <span class="kpi-badge badge-danger">Needs Improvement</span>
+      </div>
+      
+      <div class="kpi-card primary">
+        <div class="kpi-label">Total Hubs</div>
+        <div class="kpi-value" id="th-total">4</div>
+        <div class="kpi-subtitle">Reporting hubs</div>
+      </div>
+      
+      <div class="kpi-card success">
+        <div class="kpi-label">Top Performer</div>
+        <div class="kpi-value" id="th-top">PHC</div>
+        <div class="kpi-subtitle">Highest achievement</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <div class="chart-title">Hub CTRR: Projected vs Achieved</div>
+          <div class="chart-icon">🎯</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="hubCTRRChart"></canvas>
+        </div>
+        <div class="ctrr-achievement-cards">
+          <div class="ctrr-card">
+            <div class="ctrr-card-label">Total Projected</div>
+            <div class="ctrr-card-value" id="ctrr-projected">1,555</div>
+            <div class="ctrr-card-subtitle">Target cases</div>
+          </div>
+          <div class="ctrr-card">
+            <div class="ctrr-card-label">Total Achieved</div>
+            <div class="ctrr-card-value" id="ctrr-achieved">1,523</div>
+            <div class="ctrr-card-subtitle">Actual cases</div>
+          </div>
+          <div class="ctrr-card">
+            <div class="ctrr-card-label">Overall Achievement</div>
+            <div class="ctrr-card-value" id="ctrr-achievement">98.0%</div>
+            <div class="ctrr-card-subtitle">Performance rate</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">CTRR Achievement Rate</div>
+          <div class="chart-icon">📊</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="ctrrAchievementChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Positivity Achievement</div>
+          <div class="chart-icon">💉</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="positivityAchChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="chart-header">
+        <div class="chart-title">Hub Performance Summary</div>
+      </div>
+      <table class="data-table" id="hubTable">
+        <thead>
+          <tr>
+            <th>Reporting Hub</th>
+            <th>CTRR Projected</th>
+            <th>CTRR Achieved</th>
+            <th>% Achievement</th>
+            <th>Positivity Target</th>
+            <th>Positivity Achieved</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab Content: Track Positive -->
+  <div class="tab-content" id="tab-4">
+    <div class="kpi-grid">
+      <div class="kpi-card primary">
+        <div class="kpi-label">Total Positive Cases</div>
+        <div class="kpi-value" id="tp-total">89</div>
+        <div class="kpi-subtitle">Identified & tracked</div>
+      </div>
+      
+      <div class="kpi-card success">
+        <div class="kpi-label">Linked to ART</div>
+        <div class="kpi-value" id="tp-linked">88</div>
+        <div class="kpi-subtitle">98.9% linkage rate</div>
+        <span class="kpi-badge badge-success">Excellent</span>
+      </div>
+      
+      <div class="kpi-card info">
+        <div class="kpi-label">Avg Linkage Time</div>
+        <div class="kpi-value" id="tp-time">0</div>
+        <div class="kpi-subtitle">Days to ART start</div>
+      </div>
+      
+      <div class="kpi-card purple">
+        <div class="kpi-label">Follow-up Rate</div>
+        <div class="kpi-value" id="tp-followup">0%</div>
+        <div class="kpi-subtitle">2nd visit completed</div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Linkage Pathway</div>
+          <div class="chart-icon">🔗</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="linkageChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Cases by Hub</div>
+          <div class="chart-icon">📍</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="casesByHubChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Gender Split</div>
+          <div class="chart-icon">⚧</div>
+        </div>
+        <div class="chart-body small">
+          <canvas id="trackGenderChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Age Groups</div>
+          <div class="chart-icon">🎂</div>
+        </div>
+        <div class="chart-body small">
+          <canvas id="trackAgeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="chart-header">
+        <div class="chart-title">Positive Cases Tracking Table</div>
+      </div>
+      <table class="data-table" id="trackTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Date Tested</th>
+            <th>Hub</th>
+            <th>Facility</th>
+            <th>ART Start</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+// Global data storage
+let rawData = {
+  patientBenchmark: [],
+  facilityTesting: [],
+  testingHub: [],
+  trackPositive: [],
+  condom: [],
+  pmtct: []
+};
+
+let filteredData = {};
+let charts = {};
+let activeFilters = {
+  hub: 'all',
+  facility: 'all',
+  date: 'all',
+  gender: 'all',
+  age: 'all',
+  cd4: 'all'
+};
+
+const colors = {
+  primary: '#8B1538',
+  success: '#0F7C3C',
+  warning: '#D68910',
+  danger: '#C81E3A',
+  info: '#2F5D82',
+  purple: '#7B3F9E',
+  gray: '#6B7280'
+};
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+  initializeDashboard();
+});
+
+function initializeDashboard() {
+  loadInitialData();
+  populateFilters();
+  updateAllVisualizations();
+}
+
+function loadInitialData() {
+  // Initial data (will be replaced by uploaded Excel)
+  // Set default filtered data that will be recalculated by calculateMetrics
+  filteredData = {
+    overview: {
+      total_patients: 88,
+      art_initiation_rate: 100.0,
+      tpt_coverage: 100.0,
+      overall_positivity: 1.7,
+      linkage_rate: 98.9,
+      avg_ctrr_achievement: 81.0,
+      total_tested: 5248,
+      total_positive: 89
+    },
+    patientBenchmark: {
+      total: 88,
+      art_initiated: 88,
+      tpt_eligible: 88,
+      tpt_initiated: 88,
+      cd4_below_200: 0,
+      cd4_above_200: 88,
+      syphilis_tested: 88,
+      syphilis_positive: 0,
+      cervical_eligible: 0,
+      cervical_screened: 0
+    },
+    trackPositive: {
+      total: 89,
+      linked_to_art: 88,
+      gender_dist: { F: 60, M: 29 },
+      age_dist: { '15-24': 10, '25-34': 45, '35-44': 25, '45-54': 7, '55+': 2 }
+    },
+    facilityTesting: [
+      {facility: 'PHC Sabongida', tested: 745, positive: 13, positivity: 1.7, index: 196},
+      {facility: 'FTI', tested: 520, positive: 10, positivity: 1.9, index: 225},
+      {facility: 'GH Panda', tested: 389, positive: 4, positivity: 1.0, index: 17},
+      {facility: 'PHC Kofar Pada', tested: 162, positive: 2, positivity: 1.2, index: 15},
+      {facility: 'PHC Panda', tested: 41, positive: 0, positivity: 0.0, index: 0}
+    ],
+    testingHub: [
+      {hub: 'PHC Sabongida', projected: 566, achieved: 745, pct: 131.6, pos_target: 18, pos_achieved: 13, pos_pct: 72.2},
+      {hub: 'PHC Azara', projected: 56, achieved: 51, pct: 91.1, pos_target: 1, pos_achieved: 0, pos_pct: 0},
+      {hub: 'GH Panda', projected: 483, achieved: 389, pct: 80.5, pos_target: 13, pos_achieved: 4, pos_pct: 30.8},
+      {hub: 'FTI', projected: 450, achieved: 338, pct: 75.1, pos_target: 18, pos_achieved: 10, pos_pct: 55.6}
+    ]
+  };
+  
+  // If data has been loaded, recalculate with current filters
+  if (rawData.patientBenchmark.length > 0) {
+    calculateMetrics();
+  }
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    handleFile(file);
+  }
+}
+
+function handleFile(file) {
+  if (!file.name.match(/\.(xlsx|xls)$/)) {
+    alert('Please upload an Excel file (.xlsx or .xls)');
+    return;
+  }
+  
+  const fileInfo = document.getElementById('fileInfo');
+  fileInfo.textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+  fileInfo.classList.add('show');
+  
+  showLoading(true);
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      
+      // Parse sheets
+      parseExcelData(workbook);
+      
+      // Update all visualizations
+      updateAllVisualizations();
+      
+      showLoading(false);
+      alert('✅ Data loaded successfully!');
+    } catch (error) {
+      console.error('Error parsing Excel:', error);
+      showLoading(false);
+      alert('❌ Error loading file. Please check the format.');
+    }
+  };
+  
+  reader.readAsArrayBuffer(file);
+}
+
+function parseExcelData(workbook) {
+  // Parse each sheet
+  const sheetNames = workbook.SheetNames;
+  
+  sheetNames.forEach(sheetName => {
+    const sheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(sheet);
+    
+    switch(sheetName) {
+      case 'Patient_Benchmark':
+        rawData.patientBenchmark = data;
+        break;
+      case 'Facility_Testing':
+        rawData.facilityTesting = data;
+        break;
+      case 'Testing_Hub':
+        rawData.testingHub = data;
+        break;
+      case 'Track_Positive':
+        rawData.trackPositive = data;
+        break;
+      case 'Condom':
+        rawData.condom = data;
+        break;
+      case 'PMTCT':
+        rawData.pmtct = data;
+        break;
+    }
+  });
+  
+  // Recalculate metrics
+  calculateMetrics();
+  
+  // Repopulate date filter with new data
+  populateDateFilter();
+}
+
+function calculateMetrics() {
+  // Get raw data arrays (create copies to avoid mutation)
+  let pb = rawData.patientBenchmark.length > 0 ? [...rawData.patientBenchmark] : [];
+  let ft = rawData.facilityTesting.length > 0 ? [...rawData.facilityTesting] : [];
+  let th = rawData.testingHub.length > 0 ? [...rawData.testingHub] : [];
+  let tp = rawData.trackPositive.length > 0 ? [...rawData.trackPositive] : [];
+  
+  // Apply date/month filter FIRST (most restrictive)
+  if (activeFilters.date !== 'all') {
+    pb = pb.filter(p => {
+      const date = p['Date of HIV Positive Test '] || p['Date of Enrollment '];
+      if (!date) return false;
+      const month = formatMonth(date);
+      return month === activeFilters.date;
+    });
+    
+    ft = ft.filter(f => {
+      const date = f.Date;
+      if (!date) return false;
+      const month = formatMonth(date);
+      return month === activeFilters.date;
+    });
+    
+    th = th.filter(h => {
+      const date = h.Date;
+      if (!date) return false;
+      const month = formatMonth(date);
+      return month === activeFilters.date;
+    });
+    
+    tp = tp.filter(p => {
+      const date = p['Date Tested'] || p['Reporting Period'];
+      if (!date) return false;
+      const month = formatMonth(date);
+      return month === activeFilters.date;
+    });
+  }
+  
+  // Apply hub filter
+  if (activeFilters.hub !== 'all') {
+    pb = pb.filter(p => p['Reporting Hub'] === activeFilters.hub);
+    tp = tp.filter(p => p['Reporting Hub'] === activeFilters.hub);
+    th = th.filter(h => h['Reporting Hub'] === activeFilters.hub);
+    // Also filter facilities that belong to this hub (if facility data has hub reference)
+    ft = ft.filter(f => f['Reporting Hub'] === activeFilters.hub || !f['Reporting Hub']);
+  }
+  
+  // Apply facility filter - UNIQUE facilities only, no double counting
+  if (activeFilters.facility !== 'all') {
+    ft = ft.filter(f => f.Facility === activeFilters.facility);
+    tp = tp.filter(p => p.Facility === activeFilters.facility);
+    pb = pb.filter(p => p.Facility === activeFilters.facility || !p.Facility);
+  }
+  
+  // Apply gender filter - affects patient and track positive data
+  if (activeFilters.gender !== 'all') {
+    tp = tp.filter(p => p.Gender?.trim() === activeFilters.gender);
+    pb = pb.filter(p => p.Remark === activeFilters.gender || p.Gender === activeFilters.gender);
+  }
+  
+  // Apply age filter - affects patient and track positive data
+  if (activeFilters.age !== 'all') {
+    tp = tp.filter(p => {
+      const age = parseInt(p['Age ']);
+      if (isNaN(age)) return false;
+      
+      switch(activeFilters.age) {
+        case '0-14': return age >= 0 && age <= 14;
+        case '15-24': return age >= 15 && age <= 24;
+        case '25-34': return age >= 25 && age <= 34;
+        case '35-44': return age >= 35 && age <= 44;
+        case '45-54': return age >= 45 && age <= 54;
+        case '55+': return age >= 55;
+        default: return true;
+      }
+    });
+    
+    pb = pb.filter(p => {
+      const age = parseInt(p['Age '] || p.Age);
+      if (isNaN(age)) return false;
+      
+      switch(activeFilters.age) {
+        case '0-14': return age >= 0 && age <= 14;
+        case '15-24': return age >= 15 && age <= 24;
+        case '25-34': return age >= 25 && age <= 34;
+        case '35-44': return age >= 35 && age <= 44;
+        case '45-54': return age >= 45 && age <= 54;
+        case '55+': return age >= 55;
+        default: return true;
+      }
+    });
+  }
+  
+  // Apply CD4 filter
+  if (activeFilters.cd4 !== 'all') {
+    pb = pb.filter(p => p['Baseline CD4'] === activeFilters.cd4);
+  }
+  
+  // Calculate Patient Benchmark metrics from FILTERED data
+  const totalPatients = pb.length;
+  const artInitiated = pb.filter(p => p.ART_Start_Date).length;
+  const artRate = totalPatients > 0 ? (artInitiated / totalPatients * 100) : 100;
+  
+  const tptEligible = pb.filter(p => p['Eligible for TPT'] === 'Yes').length;
+  const tptInitiated = pb.filter(p => p['Date of TPT initiation ']).length;
+  const tptCoverage = tptEligible > 0 ? (tptInitiated / tptEligible * 100) : 100;
+  
+  const cd4Below200 = pb.filter(p => p['Baseline CD4'] === '<200').length;
+  const cd4Above200 = pb.filter(p => p['Baseline CD4'] === '>=200').length;
+  
+  const syphilisTested = pb.filter(p => p['Date tested for syphilis ']).length;
+  const syphilisPositive = pb.filter(p => p['Syphilis test result'] === 'Positive').length;
+  
+  const cervicalEligible = pb.filter(p => p['Eligibility for Cervical Cancer Screening'] === 'Yes').length;
+  const cervicalScreened = pb.filter(p => p['Date screened for cervical cancer ']).length;
+  
+  // Calculate Facility Testing metrics - UNIQUE facilities only
+  // Group by facility to ensure no double counting
+  const uniqueFacilities = new Map();
+  ft.forEach(f => {
+    const facilityName = f.Facility;
+    if (!uniqueFacilities.has(facilityName)) {
+      uniqueFacilities.set(facilityName, {
+        tested: 0,
+        positive: 0,
+        index: 0
+      });
+    }
+    const facility = uniqueFacilities.get(facilityName);
+    facility.tested += parseInt(f['Total Tested']) || 0;
+    facility.positive += parseFloat(f.Positivity2) || 0;
+    facility.index += parseInt(f['Index Testing']) || 0;
+  });
+  
+  const totalTested = Array.from(uniqueFacilities.values()).reduce((sum, f) => sum + f.tested, 0);
+  const totalPositive = Array.from(uniqueFacilities.values()).reduce((sum, f) => sum + f.positive, 0);
+  const overallPositivity = totalTested > 0 ? (totalPositive / totalTested * 100) : 1.7;
+  
+  // Calculate Testing Hub metrics
+  const avgCTRR = th.length > 0 ? th.reduce((sum, h) => sum + (parseFloat(h['%CTRR Achieved']) || 0), 0) / th.length * 100 : 81.0;
+  
+  // Calculate Track Positive metrics
+  const totalPositiveTracked = tp.length;
+  const linkedToART = tp.filter(p => p['ART start Date']).length;
+  const linkageRate = totalPositiveTracked > 0 ? (linkedToART / totalPositiveTracked * 100) : 98.9;
+  
+  // Gender distribution from FILTERED track positive data
+  const genderDist = {
+    F: tp.filter(p => p.Gender?.trim() === 'F').length,
+    M: tp.filter(p => p.Gender?.trim() === 'M').length
+  };
+  
+  // Age distribution from FILTERED track positive data
+  const ageDist = {
+    '0-14': tp.filter(p => {const age = parseInt(p['Age ']); return age >= 0 && age <= 14;}).length,
+    '15-24': tp.filter(p => {const age = parseInt(p['Age ']); return age >= 15 && age <= 24;}).length,
+    '25-34': tp.filter(p => {const age = parseInt(p['Age ']); return age >= 25 && age <= 34;}).length,
+    '35-44': tp.filter(p => {const age = parseInt(p['Age ']); return age >= 35 && age <= 44;}).length,
+    '45-54': tp.filter(p => {const age = parseInt(p['Age ']); return age >= 45 && age <= 54;}).length,
+    '55+': tp.filter(p => {const age = parseInt(p['Age ']); return age >= 55;}).length
+  };
+  
+  // Update filteredData - use actual filtered values, fall back to defaults only if NO data
+  filteredData = {
+    overview: {
+      total_patients: totalPatients >= 0 ? totalPatients : 88,
+      art_initiation_rate: artRate,
+      tpt_coverage: tptCoverage,
+      overall_positivity: overallPositivity,
+      linkage_rate: linkageRate,
+      avg_ctrr_achievement: avgCTRR,
+      total_tested: totalTested >= 0 ? totalTested : 5248,
+      total_positive: totalPositiveTracked >= 0 ? totalPositiveTracked : 89
+    },
+    patientBenchmark: {
+      total: totalPatients >= 0 ? totalPatients : 88,
+      art_initiated: artInitiated >= 0 ? artInitiated : 88,
+      tpt_eligible: tptEligible >= 0 ? tptEligible : 88,
+      tpt_initiated: tptInitiated >= 0 ? tptInitiated : 88,
+      cd4_below_200: cd4Below200,
+      cd4_above_200: cd4Above200 >= 0 ? cd4Above200 : 88,
+      syphilis_tested: syphilisTested >= 0 ? syphilisTested : 88,
+      syphilis_positive: syphilisPositive,
+      cervical_eligible: cervicalEligible,
+      cervical_screened: cervicalScreened
+    },
+    trackPositive: {
+      total: totalPositiveTracked >= 0 ? totalPositiveTracked : 89,
+      linked_to_art: linkedToART >= 0 ? linkedToART : 88,
+      gender_dist: (genderDist.F + genderDist.M) > 0 ? genderDist : { F: 60, M: 29 },
+      age_dist: Object.values(ageDist).some(v => v > 0) ? ageDist : { '0-14': 0, '15-24': 10, '25-34': 45, '35-44': 25, '45-54': 7, '55+': 2 }
+    },
+    facilityTesting: uniqueFacilities.size > 0 ? Array.from(uniqueFacilities.entries()).map(([name, data]) => ({
+      facility: name,
+      tested: data.tested,
+      positive: data.positive,
+      positivity: data.tested > 0 ? (data.positive / data.tested * 100) : 0,
+      index: data.index
+    })) : [
+      {facility: 'PHC Sabongida', tested: 745, positive: 13, positivity: 1.7, index: 196},
+      {facility: 'FTI', tested: 520, positive: 10, positivity: 1.9, index: 225},
+      {facility: 'GH Panda', tested: 389, positive: 4, positivity: 1.0, index: 17},
+      {facility: 'PHC Kofar Pada', tested: 162, positive: 2, positivity: 1.2, index: 15},
+      {facility: 'PHC Panda', tested: 41, positive: 0, positivity: 0.0, index: 0}
+    ],
+    testingHub: th.length > 0 ? th.map(h => ({
+      hub: h['Reporting Hub'],
+      projected: parseFloat(h['CTRR Projected']) || 0,
+      achieved: parseFloat(h['CTRR Achieved']) || 0,
+      pct: parseFloat(h['%CTRR Achieved']) * 100 || 0,
+      pos_target: parseFloat(h['Positivity Projected']) || 0,
+      pos_achieved: parseFloat(h['Positivity Achiecved ']) || 0,
+      pos_pct: parseFloat(h['% Positivity Achieved']) * 100 || 0
+    })) : [
+      {hub: 'PHC Sabongida', projected: 566, achieved: 745, pct: 131.6, pos_target: 18, pos_achieved: 13, pos_pct: 72.2},
+      {hub: 'PHC Azara', projected: 56, achieved: 51, pct: 91.1, pos_target: 1, pos_achieved: 0, pos_pct: 0},
+      {hub: 'GH Panda', projected: 483, achieved: 389, pct: 80.5, pos_target: 13, pos_achieved: 4, pos_pct: 30.8},
+      {hub: 'FTI', projected: 450, achieved: 338, pct: 75.1, pos_target: 18, pos_achieved: 10, pos_pct: 55.6}
+    ]
+  };
+}
+
+// Helper function to format dates to month
+function formatMonth(dateValue) {
+  if (!dateValue) return '';
+  
+  let date;
+  if (typeof dateValue === 'string') {
+    date = new Date(dateValue);
+  } else if (typeof dateValue === 'number') {
+    // Excel serial date
+    date = new Date((dateValue - 25569) * 86400 * 1000);
+  } else {
+    date = dateValue;
+  }
+  
+  if (isNaN(date.getTime())) return '';
+  
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function populateFilters() {
+  const hubs = ['GH PANDA', 'PHC SABONGIDA', 'PHC AZARA', 'FTI'];
+  const facilities = ['GH Panda', 'PHC Panda', 'PHC Kofar Pada', 'PHC Sabongida', 'FTI'];
+  
+  const hubFilter = document.getElementById('hubFilter');
+  hubs.forEach(hub => {
+    const option = document.createElement('option');
+    option.value = hub;
+    option.textContent = hub;
+    hubFilter.appendChild(option);
+  });
+  
+  const facilityFilter = document.getElementById('facilityFilter');
+  facilities.forEach(facility => {
+    const option = document.createElement('option');
+    option.value = facility;
+    option.textContent = facility;
+    facilityFilter.appendChild(option);
+  });
+  
+  // Populate date filter from data
+  populateDateFilter();
+}
+
+function populateDateFilter() {
+  const dateFilter = document.getElementById('dateFilter');
+  const uniqueMonths = new Set();
+  
+  // Extract dates from all data sources
+  if (rawData.patientBenchmark.length > 0) {
+    rawData.patientBenchmark.forEach(p => {
+      const date = p['Date of HIV Positive Test '] || p['Date of Enrollment '];
+      if (date) {
+        const month = formatMonth(date);
+        if (month) uniqueMonths.add(month);
+      }
+    });
+  }
+  
+  if (rawData.facilityTesting.length > 0) {
+    rawData.facilityTesting.forEach(f => {
+      if (f.Date) {
+        const month = formatMonth(f.Date);
+        if (month) uniqueMonths.add(month);
+      }
+    });
+  }
+  
+  if (rawData.testingHub.length > 0) {
+    rawData.testingHub.forEach(h => {
+      if (h.Date) {
+        const month = formatMonth(h.Date);
+        if (month) uniqueMonths.add(month);
+      }
+    });
+  }
+  
+  if (rawData.trackPositive.length > 0) {
+    rawData.trackPositive.forEach(p => {
+      const date = p['Date Tested'] || p['Reporting Period'];
+      if (date) {
+        const month = formatMonth(date);
+        if (month) uniqueMonths.add(month);
+      }
+    });
+  }
+  
+  // Add default months if no data loaded
+  if (uniqueMonths.size === 0) {
+    uniqueMonths.add('Oct 2025');
+    uniqueMonths.add('Nov 2025');
+  }
+  
+  // Clear existing options except "All Months"
+  dateFilter.innerHTML = '<option value="all">All Months</option>';
+  
+  // Sort and add month options
+  const sortedMonths = Array.from(uniqueMonths).sort((a, b) => {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+    return dateB - dateA; // Most recent first
+  });
+  
+  sortedMonths.forEach(month => {
+    const option = document.createElement('option');
+    option.value = month;
+    option.textContent = month;
+    dateFilter.appendChild(option);
+  });
+}
+
+function applyFilters() {
+  activeFilters.hub = document.getElementById('hubFilter').value;
+  activeFilters.facility = document.getElementById('facilityFilter').value;
+  activeFilters.date = document.getElementById('dateFilter').value;
+  activeFilters.gender = document.getElementById('genderFilter').value;
+  activeFilters.age = document.getElementById('ageFilter').value;
+  activeFilters.cd4 = document.getElementById('cd4Filter').value;
+  
+  updateFilterStatus();
+  calculateMetrics();  // Recalculate with new filters
+  updateAllVisualizations();
+}
+
+function updateFilterStatus() {
+  const activeCount = Object.values(activeFilters).filter(v => v !== 'all').length;
+  const statusEl = document.getElementById('filterStatus');
+  
+  if (activeCount === 0) {
+    statusEl.textContent = 'No filters applied';
+  } else {
+    statusEl.textContent = `${activeCount} filter(s) active`;
+  }
+}
+
+function resetFilters() {
+  document.getElementById('hubFilter').value = 'all';
+  document.getElementById('facilityFilter').value = 'all';
+  document.getElementById('dateFilter').value = 'all';
+  document.getElementById('genderFilter').value = 'all';
+  document.getElementById('ageFilter').value = 'all';
+  document.getElementById('cd4Filter').value = 'all';
+  
+  activeFilters = {
+    hub: 'all',
+    facility: 'all',
+    date: 'all',
+    gender: 'all',
+    age: 'all',
+    cd4: 'all'
+  };
+  
+  updateFilterStatus();
+  calculateMetrics();  // Recalculate with all filters cleared
+  updateAllVisualizations();
+}
+
+function switchTab(index) {
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.remove('active');
+  });
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  document.getElementById(`tab-${index}`).classList.add('active');
+  document.querySelectorAll('.tab-btn')[index].classList.add('active');
+}
+
+function showLoading(show) {
+  const overlay = document.getElementById('loadingOverlay');
+  if (show) {
+    overlay.classList.add('show');
+  } else {
+    overlay.classList.remove('show');
+  }
+}
+
+function refreshDashboard() {
+  showLoading(true);
+  setTimeout(() => {
+    updateAllVisualizations();
+    showLoading(false);
+  }, 1000);
+}
+
+function updateAllVisualizations() {
+  updateAllKPIs();
+  createAllCharts();
+  updateAllTables();
+}
+
+function updateAllKPIs() {
+  const data = filteredData.overview;
+  const pb = filteredData.patientBenchmark;
+  const tp = filteredData.trackPositive;
+  
+  // Overview KPIs
+  document.getElementById('kpi-art-rate').textContent = data.art_initiation_rate.toFixed(1) + '%';
+  document.getElementById('kpi-art-subtitle').textContent = `${pb.art_initiated} patients initiated`;
+  
+  document.getElementById('kpi-tpt').textContent = data.tpt_coverage.toFixed(1) + '%';
+  document.getElementById('kpi-tpt-subtitle').textContent = `${pb.tpt_initiated} of ${pb.tpt_eligible} eligible`;
+  
+  document.getElementById('kpi-positivity').textContent = data.overall_positivity.toFixed(1) + '%';
+  document.getElementById('kpi-positivity-subtitle').textContent = `${data.total_positive} positive / ${data.total_tested.toLocaleString()} tested`;
+  
+  document.getElementById('kpi-linkage').textContent = data.linkage_rate.toFixed(1) + '%';
+  document.getElementById('kpi-linkage-subtitle').textContent = `${tp.linked_to_art} of ${tp.total} linked`;
+  
+  document.getElementById('kpi-ctrr').textContent = data.avg_ctrr_achievement.toFixed(1) + '%';
+  
+  document.getElementById('kpi-tested').textContent = data.total_tested.toLocaleString();
+  
+  // Patient Benchmark KPIs
+  if (document.getElementById('pb-total')) {
+    document.getElementById('pb-total').textContent = pb.total;
+    document.getElementById('pb-cd4-low').textContent = pb.cd4_below_200;
+    document.getElementById('pb-cd4-high').textContent = pb.cd4_above_200;
+    document.getElementById('pb-syphilis').textContent = pb.syphilis_positive;
+    document.getElementById('pb-cervical').textContent = pb.cervical_screened;
+    document.getElementById('pb-tpt').textContent = pb.tpt_initiated;
+  }
+  
+  // Track Positive KPIs
+  if (document.getElementById('tp-total')) {
+    document.getElementById('tp-total').textContent = tp.total;
+    document.getElementById('tp-linked').textContent = tp.linked_to_art;
+  }
+  
+  // Facility Performance KPIs
+  if (document.getElementById('fp-total')) {
+    const facilities = filteredData.facilityTesting;
+    document.getElementById('fp-total').textContent = facilities.length;
+    
+    const avgPos = facilities.length > 0 
+      ? facilities.reduce((sum, f) => sum + f.positivity, 0) / facilities.length 
+      : 0;
+    document.getElementById('fp-positivity').textContent = avgPos.toFixed(1) + '%';
+    
+    const highPerformers = facilities.filter(f => f.positivity > 2).length;
+    document.getElementById('fp-high').textContent = highPerformers;
+    
+    const totalIndex = facilities.reduce((sum, f) => sum + f.index, 0);
+    document.getElementById('fp-index').textContent = totalIndex;
+  }
+  
+  // Testing Hub KPIs
+  if (document.getElementById('th-total')) {
+    const hubs = filteredData.testingHub;
+    document.getElementById('th-total').textContent = hubs.length;
+    
+    const avgCTRR = hubs.length > 0 
+      ? hubs.reduce((sum, h) => sum + h.pct, 0) / hubs.length 
+      : 0;
+    document.getElementById('th-ctrr').textContent = avgCTRR.toFixed(1) + '%';
+    
+    const avgPosAch = hubs.length > 0 
+      ? hubs.reduce((sum, h) => sum + h.pos_pct, 0) / hubs.length 
+      : 0;
+    document.getElementById('th-pos-ach').textContent = avgPosAch.toFixed(1) + '%';
+    
+    if (hubs.length > 0) {
+      const topHub = hubs.reduce((max, h) => h.pct > max.pct ? h : max, hubs[0]);
+      const hubName = topHub.hub.split(' ').slice(-1)[0]; // Get last word
+      document.getElementById('th-top').textContent = hubName;
+    }
+  }
+}
+
+function createAllCharts() {
+  createCascadeChart();
+  createHubPerformanceChart();
+  createGenderChart();
+  createAgeChart();
+  createCD4Chart();
+  createScreeningChart();
+  createHubPatientChart();
+  createFacilityBarChart();
+  createTopFacilitiesChart();
+  createPositivityDistChart();
+  createHubCTRRChart();
+  createCTRRAchievementChart();
+  createPositivityAchChart();
+  createLinkageChart();
+  createCasesByHubChart();
+  createTrackGenderChart();
+  createTrackAgeChart();
+}
+
+function createCascadeChart() {
+  const ctx = document.getElementById('cascadeChart');
+  if (!ctx) return;
+  
+  if (charts.cascade) charts.cascade.destroy();
+  
+  const data = filteredData.overview;
+  const pb = filteredData.patientBenchmark;
+  const tp = filteredData.trackPositive;
+  
+  charts.cascade = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Tested', 'Positive', 'Linked', 'ART Init', 'TPT Init'],
+      datasets: [{
+        data: [
+          data.total_tested || 0,
+          tp.total || 0,
+          tp.linked_to_art || 0,
+          pb.art_initiated || 0,
+          pb.tpt_initiated || 0
+        ],
+        backgroundColor: [colors.info, colors.warning, colors.success, colors.primary, colors.purple],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value) => value.toLocaleString(),
+          font: { weight: 'bold', size: 11 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: (value) => value.toLocaleString() }
+        }
+      }
+    }
+  });
+}
+
+function createHubPerformanceChart() {
+  const ctx = document.getElementById('hubPerformanceChart');
+  if (!ctx) return;
+  
+  if (charts.hubPerf) charts.hubPerf.destroy();
+  
+  const hubs = filteredData.testingHub;
+  
+  if (hubs.length === 0) {
+    return;
+  }
+  
+  charts.hubPerf = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hubs.map(h => h.hub),
+      datasets: [{
+        data: hubs.map(h => h.pct),
+        backgroundColor: colors.primary,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          formatter: (value) => value.toFixed(1) + '%',
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 150,
+          ticks: { callback: (value) => value + '%' }
+        }
+      }
+    }
+  });
+}
+
+function createGenderChart() {
+  const ctx = document.getElementById('genderChart');
+  if (!ctx) return;
+  
+  if (charts.gender) charts.gender.destroy();
+  
+  const data = filteredData.trackPositive.gender_dist;
+  
+  charts.gender = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Female', 'Male'],
+      datasets: [{
+        data: [data.F, data.M],
+        backgroundColor: [colors.purple, colors.info],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        datalabels: {
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = ((value / total) * 100).toFixed(1);
+            return value + '\n(' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 10 },
+          color: '#fff'
+        }
+      }
+    }
+  });
+}
+
+function createAgeChart() {
+  const ctx = document.getElementById('ageChart');
+  if (!ctx) return;
+  
+  if (charts.age) charts.age.destroy();
+  
+  const data = filteredData.trackPositive.age_dist;
+  
+  charts.age = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data),
+      datasets: [{
+        data: Object.values(data),
+        backgroundColor: colors.success,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = ((value / total) * 100).toFixed(1);
+            return value + ' (' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function createCD4Chart() {
+  const ctx = document.getElementById('cd4Chart');
+  if (!ctx) return;
+  
+  if (charts.cd4) charts.cd4.destroy();
+  
+  const data = filteredData.patientBenchmark;
+  
+  charts.cd4 = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['CD4 ≥ 200', 'CD4 < 200'],
+      datasets: [{
+        data: [data.cd4_above_200, data.cd4_below_200],
+        backgroundColor: [colors.success, colors.danger],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        datalabels: {
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+            return value + '\n(' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 14 },
+          color: '#fff'
+        }
+      }
+    }
+  });
+}
+
+function createScreeningChart() {
+  const ctx = document.getElementById('screeningChart');
+  if (!ctx) return;
+  
+  if (charts.screening) charts.screening.destroy();
+  
+  const data = filteredData.patientBenchmark;
+  
+  charts.screening = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['TPT Eligible', 'TPT Initiated', 'Syphilis Tested', 'Syphilis+'],
+      datasets: [{
+        data: [data.tpt_eligible, data.tpt_initiated, data.syphilis_tested, data.syphilis_positive],
+        backgroundColor: [colors.warning, colors.success, colors.info, colors.danger],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value) => value.toLocaleString(),
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function createHubPatientChart() {
+  const ctx = document.getElementById('hubPatientChart');
+  if (!ctx) return;
+  
+  if (charts.hubPatient) charts.hubPatient.destroy();
+  
+  const hubs = filteredData.testingHub;
+  
+  if (hubs.length === 0) {
+    return;
+  }
+  
+  charts.hubPatient = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hubs.map(h => h.hub),
+      datasets: [{
+        data: hubs.map(h => h.achieved),
+        backgroundColor: colors.primary,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+            return value + ' (' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function createFacilityBarChart() {
+  const ctx = document.getElementById('facilityBarChart');
+  if (!ctx) return;
+  
+  if (charts.facilityBar) charts.facilityBar.destroy();
+  
+  const facilities = filteredData.facilityTesting;
+  
+  if (facilities.length === 0) {
+    return;
+  }
+  
+  charts.facilityBar = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: facilities.map(f => f.facility),
+      datasets: [
+        {
+          label: 'Tested',
+          data: facilities.map(f => f.tested),
+          backgroundColor: colors.info,
+          borderRadius: 6
+        },
+        {
+          label: 'Positive',
+          data: facilities.map(f => f.positive),
+          backgroundColor: colors.warning,
+          borderRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value) => value.toLocaleString(),
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function createTopFacilitiesChart() {
+  const ctx = document.getElementById('topFacilitiesChart');
+  if (!ctx) return;
+  
+  if (charts.topFacilities) charts.topFacilities.destroy();
+  
+  const facilities = filteredData.facilityTesting;
+  
+  if (facilities.length === 0) {
+    return;
+  }
+  
+  // Sort by tested volume and take top 10
+  const topFacilities = [...facilities]
+    .sort((a, b) => b.tested - a.tested)
+    .slice(0, 10);
+  
+  charts.topFacilities = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: topFacilities.map(f => f.facility),
+      datasets: [{
+        data: topFacilities.map(f => f.tested),
+        backgroundColor: colors.success,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          formatter: (value) => value.toLocaleString(),
+          font: { weight: 'bold', size: 11 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        x: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function createPositivityDistChart() {
+  const ctx = document.getElementById('positivityDistChart');
+  if (!ctx) return;
+  
+  if (charts.positivityDist) charts.positivityDist.destroy();
+  
+  const facilities = filteredData.facilityTesting;
+  
+  if (facilities.length === 0) {
+    return;
+  }
+  
+  charts.positivityDist = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: facilities.map(f => f.facility),
+      datasets: [{
+        data: facilities.map(f => f.positivity),
+        borderColor: colors.danger,
+        backgroundColor: 'rgba(200, 30, 58, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 6,
+        pointHoverRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'top',
+          align: 'top',
+          formatter: (value) => value.toFixed(1) + '%',
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { callback: (value) => value + '%' }
+        }
+      }
+    }
+  });
+}
+
+function createHubCTRRChart() {
+  const ctx = document.getElementById('hubCTRRChart');
+  if (!ctx) return;
+  
+  if (charts.hubCTRR) charts.hubCTRR.destroy();
+  
+  const hubs = filteredData.testingHub;
+  
+  charts.hubCTRR = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hubs.map(h => h.hub),
+      datasets: [
+        {
+          label: 'Projected',
+          data: hubs.map(h => h.projected),
+          backgroundColor: colors.gray,
+          borderRadius: 6,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Achieved',
+          data: hubs.map(h => h.achieved),
+          backgroundColor: colors.success,
+          borderRadius: 6,
+          yAxisID: 'y'
+        },
+        {
+          label: '% Achievement',
+          data: hubs.map(h => h.pct),
+          type: 'line',
+          borderColor: colors.primary,
+          backgroundColor: 'rgba(139, 21, 56, 0.1)',
+          borderWidth: 3,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        datalabels: {
+          formatter: (value, ctx) => {
+            if (ctx.dataset.type === 'line') {
+              return value.toFixed(1) + '%';
+            }
+            return value.toLocaleString();
+          },
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          beginAtZero: true,
+          ticks: { callback: (value) => value.toLocaleString() }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          beginAtZero: true,
+          max: 150,
+          ticks: { callback: (value) => value + '%' },
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
+  
+  // Update CTRR achievement cards
+  const totalProjected = hubs.reduce((sum, h) => sum + h.projected, 0);
+  const totalAchieved = hubs.reduce((sum, h) => sum + h.achieved, 0);
+  const overallAchievement = (totalAchieved / totalProjected * 100).toFixed(1);
+  
+  document.getElementById('ctrr-projected').textContent = totalProjected.toLocaleString();
+  document.getElementById('ctrr-achieved').textContent = totalAchieved.toLocaleString();
+  document.getElementById('ctrr-achievement').textContent = overallAchievement + '%';
+}
+
+function createCTRRAchievementChart() {
+  const ctx = document.getElementById('ctrrAchievementChart');
+  if (!ctx) return;
+  
+  if (charts.ctrrAch) charts.ctrrAch.destroy();
+  
+  const hubs = filteredData.testingHub;
+  
+  charts.ctrrAch = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hubs.map(h => h.hub),
+      datasets: [{
+        data: hubs.map(h => h.pct),
+        backgroundColor: hubs.map(h => {
+          if (h.pct >= 100) return colors.success;
+          if (h.pct >= 80) return colors.warning;
+          return colors.danger;
+        }),
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value) => value.toFixed(1) + '%',
+          font: { weight: 'bold', size: 11 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 150,
+          ticks: { callback: (value) => value + '%' }
+        }
+      }
+    }
+  });
+}
+
+function createPositivityAchChart() {
+  const ctx = document.getElementById('positivityAchChart');
+  if (!ctx) return;
+  
+  if (charts.posAch) charts.posAch.destroy();
+  
+  const hubs = filteredData.testingHub;
+  
+  charts.posAch = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hubs.map(h => h.hub),
+      datasets: [{
+        data: hubs.map(h => h.pos_pct),
+        backgroundColor: hubs.map(h => {
+          if (h.pos_pct >= 80) return colors.success;
+          if (h.pos_pct >= 50) return colors.warning;
+          return colors.danger;
+        }),
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value) => value.toFixed(1) + '%',
+          font: { weight: 'bold', size: 11 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { callback: (value) => value + '%' }
+        }
+      }
+    }
+  });
+}
+
+function createLinkageChart() {
+  const ctx = document.getElementById('linkageChart');
+  if (!ctx) return;
+  
+  if (charts.linkage) charts.linkage.destroy();
+  
+  const data = filteredData.trackPositive;
+  
+  charts.linkage = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Linked to ART', 'Not Linked'],
+      datasets: [{
+        data: [data.linked_to_art, data.total - data.linked_to_art],
+        backgroundColor: [colors.success, colors.danger],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        datalabels: {
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = ((value / total) * 100).toFixed(1);
+            return value + '\n(' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 14 },
+          color: '#fff'
+        }
+      }
+    }
+  });
+}
+
+function createCasesByHubChart() {
+  const ctx = document.getElementById('casesByHubChart');
+  if (!ctx) return;
+  
+  if (charts.casesByHub) charts.casesByHub.destroy();
+  
+  const hubs = filteredData.testingHub;
+  
+  if (hubs.length === 0) {
+    return;
+  }
+  
+  charts.casesByHub = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hubs.map(h => h.hub),
+      datasets: [{
+        data: hubs.map(h => h.pos_achieved),
+        backgroundColor: colors.primary,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+            return value + ' (' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function createTrackGenderChart() {
+  const ctx = document.getElementById('trackGenderChart');
+  if (!ctx) return;
+  
+  if (charts.trackGender) charts.trackGender.destroy();
+  
+  const data = filteredData.trackPositive.gender_dist;
+  
+  charts.trackGender = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Female', 'Male'],
+      datasets: [{
+        data: [data.F, data.M],
+        backgroundColor: [colors.purple, colors.info],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        datalabels: {
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = ((value / total) * 100).toFixed(1);
+            return value + '\n(' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 14 },
+          color: '#fff'
+        }
+      }
+    }
+  });
+}
+
+function createTrackAgeChart() {
+  const ctx = document.getElementById('trackAgeChart');
+  if (!ctx) return;
+  
+  if (charts.trackAge) charts.trackAge.destroy();
+  
+  const data = filteredData.trackPositive.age_dist;
+  
+  charts.trackAge = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data),
+      datasets: [{
+        data: Object.values(data),
+        backgroundColor: colors.warning,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'top',
+          formatter: (value, ctx) => {
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = ((value / total) * 100).toFixed(1);
+            return value + ' (' + pct + '%)';
+          },
+          font: { weight: 'bold', size: 10 },
+          color: '#1F2937'
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+function updateAllTables() {
+  // Update facility table
+  const facilityTable = document.getElementById('facilityTable')?.querySelector('tbody');
+  if (facilityTable) {
+    const facilities = filteredData.facilityTesting;
+    facilityTable.innerHTML = facilities.map(f => `
+      <tr>
+        <td>${f.facility}</td>
+        <td>${f.tested.toLocaleString()}</td>
+        <td>${f.positive}</td>
+        <td>${f.positivity.toFixed(1)}%</td>
+        <td>${f.index}</td>
+        <td><span class="status-badge status-${f.positivity >= 2 ? 'high' : f.positivity >= 1 ? 'medium' : 'low'}">${f.positivity >= 2 ? 'High' : f.positivity >= 1 ? 'Good' : 'Low'}</span></td>
+      </tr>
+    `).join('');
+  }
+  
+  // Update hub table
+  const hubTable = document.getElementById('hubTable')?.querySelector('tbody');
+  if (hubTable) {
+    const hubs = filteredData.testingHub;
+    hubTable.innerHTML = hubs.map(h => `
+      <tr>
+        <td>${h.hub}</td>
+        <td>${h.projected.toLocaleString()}</td>
+        <td>${h.achieved.toLocaleString()}</td>
+        <td>${h.pct.toFixed(1)}%</td>
+        <td>${h.pos_target}</td>
+        <td>${h.pos_achieved} (${h.pos_pct.toFixed(1)}%)</td>
+        <td><span class="status-badge status-${h.pct >= 100 ? 'high' : h.pct >= 80 ? 'medium' : 'low'}">${h.pct >= 100 ? 'Excellent' : h.pct >= 80 ? 'Good' : 'Needs Improvement'}</span></td>
+      </tr>
+    `).join('');
+  }
+  
+  // Update track table
+  const trackTable = document.getElementById('trackTable')?.querySelector('tbody');
+  if (trackTable) {
+    trackTable.innerHTML = `
+      <tr>
+        <td>MONDAY BLESSING</td>
+        <td>27</td>
+        <td>F</td>
+        <td>2025-10-22</td>
+        <td>GH PANDA</td>
+        <td>GH PANDA</td>
+        <td>2025-10-22</td>
+        <td><span class="status-badge status-high">Linked</span></td>
+      </tr>
+      <tr>
+        <td>RACHAEL UDIDAA</td>
+        <td>30</td>
+        <td>F</td>
+        <td>2025-10-09</td>
+        <td>GH PANDA</td>
+        <td>PHC ANGWA NINZO</td>
+        <td>2025-10-09</td>
+        <td><span class="status-badge status-high">Linked</span></td>
+      </tr>
+      <tr>
+        <td>SHAWU ALICE</td>
+        <td>28</td>
+        <td>F</td>
+        <td>2025-10-04</td>
+        <td>GH PANDA</td>
+        <td>PHC KOFAR PADA</td>
+        <td>2025-10-04</td>
+        <td><span class="status-badge status-high">Linked</span></td>
+      </tr>
+    `;
+  }
+}
+</script>
+
+</body>
+</html>
